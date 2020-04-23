@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.js"></script>
+</head>
+<body>
+    <div id="subject"></div>
+    <div id="TOC"></div>
+    <div id="crud"></div>
+    <div id="content"></div>
+
+    <script>
+        function reducer(state, action) {
+            if(state === undefined) {
+                return {
+                    selected_id: 1,
+                    contents: [
+                        { id: 1, title: 'HTML', desc: 'HTML is ..' },
+                        { id: 2, title: 'CSS', desc: 'CSS is ..' }
+                    ]
+                };
+            }
+
+            var newState = {};
+            if(action.type === 'SELECT') {
+                newState = Object.assign(newState, state, { selected_id: action.id });
+            }
+
+            return newState;
+        }
+
+        var store = Redux.createStore(reducer);
+        store.subscribe(content);
+
+        function subject() {
+            document.querySelector('#subject').innerHTML = `
+                <h1>WEB</h1>
+                <h2>Hello, WEB!</h2>
+            `;
+        }
+
+        function toc() {
+            var state = store.getState();
+            var list = '';
+            for(var i in state.contents) {
+                list += `
+                    <li><a href="/${state.contents[i].id}"
+                        onclick="
+                            event.preventDefault();
+                            var action = { type: 'SELECT', id: ${state.contents[i].id}}
+                            store.dispatch(action);
+                        "
+                        >${state.contents[i].title}</a></li>
+                `;
+            }
+
+            document.querySelector('#TOC').innerHTML = `
+                <ol>
+                    ${list}
+                </ol>
+            `;
+        }
+
+        function crud() {
+            document.querySelector('#crud').innerHTML = `
+                <ul>
+                    <li><a href="/create">create</li>
+                    <li><input type="button" value="delete"></li>
+                </ul>
+            `;
+        }
+
+        function content() {
+            var state = store.getState();
+            var newTitle, newDesc;
+            for(var i in state.contents) {
+                if(state.contents[i].id === state.selected_id) {
+                    newTitle = state.contents[i].title;
+                    newDesc = state.contents[i].desc;
+                    break;
+                }
+            }
+
+            document.querySelector('#content').innerHTML = `
+                ${newTitle}
+                ${newDesc}
+            `;
+        }
+        
+        subject();
+        toc();
+        crud();
+        content();
+    </script>
+</body>
+</html>

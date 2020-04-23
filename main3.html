@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.js"></script>
+</head>
+<body>
+    <div id="subject"></div>
+    <div id="list"></div>
+    <div id="crud"></div>
+    <div id="content"></div>
+
+    <script>
+        function reducer(state, action) {
+            if(state === undefined) {
+                return {
+                    selectId: 1,
+                    subject: { title: '말패', subtitle: '말패를 소개합니다'},
+                    contents: [
+                        { id: 1, name: '기준', champion: '제이스'},
+                        { id: 2, name: '절규', champion: '아무무'},
+                        { id: 3, name: '혁', champion: '미스포춘'}
+                    ]
+                }
+            };
+
+            var newState = {};
+            if(action.type = 'select') {
+                newState = Object.assign(newState, state, { selectId: action.id });
+            }
+            return newState;
+        }
+
+        var store = Redux.createStore(reducer);
+        store.subscribe(content);
+
+        function subject() {
+            var state = store.getState();
+            document.querySelector('#subject').innerHTML = `
+                <h1>${state.subject.title}</h1>
+                <div>${state.subject.subtitle}</div>
+            `;
+        }
+
+        function list() {
+            var state = store.getState();
+            var names = '';
+            for(var i in state.contents) {
+                names += `<li><a href="" onclick="
+                    event.preventDefault();
+                    var action = { type: 'select', id: ${state.contents[i].id} }
+                    store.dispatch(action);
+                    ">${state.contents[i].name}</a></li>`;
+            }
+            document.querySelector('#list').innerHTML = `
+                <ol>
+                    ${names}
+                </ol>
+            `;
+        }
+
+        function crud() {
+            document.querySelector('#crud').innerHTML = `
+                <ul>
+                    <li>create</li>
+                    <li>delete</li>
+                </ul>
+            `;
+        }
+
+        function content() {
+            var state = store.getState();
+            var clickName, clickChampion;
+            for(var i in state.contents) {
+                if(state.contents[i].id === state.selectId) {
+                    clickName = state.contents[i].name;
+                    clickChampion = state.contents[i].champion;
+                }
+            }
+            document.querySelector('#content').innerHTML = `
+                ${clickName}
+                ${clickChampion}
+            `;
+        }
+
+        subject();
+        list();
+        crud();
+        content();
+    </script>
+</body>
+</html>
