@@ -24,7 +24,7 @@
             };
 
             var newState = {};
-            if(action.type = 'select') {
+            if(action.type === 'select') {
                 newState = Object.assign(newState, state, { selectId: action.id });
             }
             return newState;

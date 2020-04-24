@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.js"></script>
+</head>
+<body>
+    <div id="head"></div>
+    <div id="list"></div>
+    <div id="content"></div>
+
+    <script>
+        function reducer(state, action) {
+            if(state === undefined) {
+                state = {
+                    id: null,
+                    head: { title: '말패', subtitle: '소개합니다' },
+                    content: [
+                        { id: 1, name: '기준', champion: '제이스' },
+                        { id: 2, name: '절규', champion: '아무무' },
+                        { id: 3, name: '혁', champion: '미스포춘' }
+                    ]
+                };
+                return state;
+            }
+
+            var newState;
+            if(action.type === 'click') {
+                newState = Object.assign({}, state, { id: action.id });
+                return newState;
+            }
+        }
+
+        var store = Redux.createStore(reducer);
+
+        function head() {
+            var state = store.getState();
+
+            document.querySelector("#head").innerHTML = `
+                <h1>${state.head.title}</h1>
+                <div>${state.head.subtitle}</div>
+            `;
+        }
+        head();
+
+        function list() {
+            var state = store.getState();
+            var lists = '';
+
+            for(var i in state.content) {
+                lists += `<li><a href="" onclick="
+                    event.preventDefault();
+                    var action = { type: 'click', id: ${state.content[i].id} };
+                    store.dispatch(action);
+                    ">${state.content[i].name}</a></li>`;
+            }
+
+            document.querySelector("#list").innerHTML = `
+                <ol>
+                    ${lists}
+                </ol>
+            `;
+        }
+        list();
+
+        function content() {
+            var state = store.getState();
+            var cName, cChampion;
+
+            for(var i in state.content) {
+                if(state.content[i].id === state.id) {
+                    cName = state.content[i].name;
+                    cChampion = state.content[i].champion;
+                }
+            }
+
+            document.querySelector("#content").innerHTML = `
+                <div>${cName}</div>
+                <div>${cChampion}</div>
+            `;
+        }
+        content();
+        store.subscribe(content);
+
+    </script>
+</body>
+</html>
