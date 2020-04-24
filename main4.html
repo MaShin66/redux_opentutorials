@@ -6,13 +6,15 @@
 <body>
     <div id="head"></div>
     <div id="list"></div>
+    <div id="crud"></div>
     <div id="content"></div>
 
     <script>
         function reducer(state, action) {
             if(state === undefined) {
                 state = {
-                    id: null,
+                    mode: 'read',
+                    clickId: null,
                     head: { title: '말패', subtitle: '소개합니다' },
                     content: [
                         { id: 1, name: '기준', champion: '제이스' },
@@ -25,9 +27,11 @@
 
             var newState;
             if(action.type === 'click') {
-                newState = Object.assign({}, state, { id: action.id });
-                return newState;
+                newState = Object.assign({}, state, { clickId: action.clickId });
+            } else if(action.type === 'create') {
+                newState = Object.assign({}, state, { mode: action.mode });
             }
+            return newState;
         }
 
         var store = Redux.createStore(reducer);
@@ -49,7 +53,7 @@
             for(var i in state.content) {
                 lists += `<li><a href="" onclick="
                     event.preventDefault();
-                    var action = { type: 'click', id: ${state.content[i].id} };
+                    var action = { type: 'click', clickId: ${state.content[i].id}, mode: 'read' };
                     store.dispatch(action);
                     ">${state.content[i].name}</a></li>`;
             }
@@ -62,21 +66,47 @@
         }
         list();
 
+
+        function crud() {
+            var state = store.getState();
+
+            document.querySelector("#crud").innerHTML = `
+                <ul>
+                    <li><a href="" onclick="
+                        event.preventDefault();
+                        var action = { type: 'create', mode: 'create'};
+                        store.dispatch(action);
+                    ">생성</a></li>
+                    <li><input type="button" value="삭제" onclick=""></input></li>
+                </ul>
+            `;
+        }
+        crud();
+
         function content() {
             var state = store.getState();
-            var cName, cChampion;
 
-            for(var i in state.content) {
-                if(state.content[i].id === state.id) {
-                    cName = state.content[i].name;
-                    cChampion = state.content[i].champion;
+            if(state.mode === 'read') {
+                var cName, cChampion;
+                for(var i in state.content) {
+                    if(state.content[i].id === state.clickId) {
+                        cName = state.content[i].name;
+                        cChampion = state.content[i].champion;
+                    }
                 }
+
+                document.querySelector("#content").innerHTML = `
+                    <div>${cName}</div>
+                    <div>${cChampion}</div>
+                `;
+            } else if(state.mode === 'create') {
+                document.querySelector("$content").innerHTML = `
+                    <div><input type="text" name=""></input></div>
+                    <div></div>
+                `;
             }
 
-            document.querySelector("#content").innerHTML = `
-                <div>${cName}</div>
-                <div>${cChampion}</div>
-            `;
+            
         }
         content();
         store.subscribe(content);
