@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.js"></script>
+</head>
+<body>
+    <div id="subject"></div>
+    <div id="menu"></div>
+    <div id="crud"></div>
+    <div id="content"></div>
+
+    <script>
+    var store = Redux.createStore(reducer);
+
+    function reducer(state, action) {
+        if(state === undefined) {
+            state = {
+                mode: 'main',
+                choiceId: null,
+                subject: { title: '말패밀리', subtitle: '말패밀리를 소개합니다.' },
+                content: [
+                    { id: 1, name: '기준', champion: '제이스' },
+                    { id: 2, name: '절규', champion: '아무무' },
+                    { id: 3, name: '혁', champion: '미스포춘' }
+                ],
+                lastId: 3
+            };
+            return state;
+        }
+
+        var newState;
+        if(action.type === 'menuClick') {
+            newState = Object.assign({}, state, { mode: action.mode, choiceId: action.id });
+        } else if(action.type === 'titleClick') {
+            newState = Object.assign({}, state, { mode: action.mode });
+        } else if(action.type === 'create') {
+            newState = Object.assign({}, state, { mode: action.mode });
+        } else if(action.type === 'submit') {
+            _content = state.content.concat();
+            _content.push({ id: state.lastId+1, name: action._name, champion: action._champion });
+            var lastId = state.lastId + 1;
+            newState = Object.assign({}, state, { mode: 'read', choiceId: lastId, content: _content, lastId: lastId });
+        } else if(action.type === 'delete') {
+            _content = state.content.concat();
+            _content.splice(action.choiceId-1, 1);
+            newState = Object.assign({}, state, { mode: 'read', content: _content });
+        }
+        console.log(newState);
+        return newState;
+    }
+
+    function subject() {
+        var state = store.getState();
+
+        document.querySelector('#subject').innerHTML = `
+            <h1><a href="/" onclick="
+                    event.preventDefault();
+                    store.dispatch({ type: 'titleClick', mode: 'main' });
+                ">${state.subject.title}</a></h1>
+            <h2>${state.subject.subtitle}</h2>
+        `;
+    }
+    subject();
+
+    function menu() {
+        var state = store.getState();
+
+        var lists = ``;
+        for(var i in state.content) {
+            lists += `<li><a href="" onclick="
+                    event.preventDefault();
+                    store.dispatch({ type: 'menuClick', mode: 'read', id: ${state.content[i].id} });
+                ">${state.content[i].name}</a></li>`;
+        }
+
+        document.querySelector('#menu').innerHTML = `
+            <ol>${lists}</ol>
+        `;
+    }
+    menu();
+    store.subscribe(menu);
+
+    function crud() {
+        var state = store.getState();
+
+        document.querySelector('#crud').innerHTML = `
+            <ul>
+                <li><a href="" onclick="
+                        event.preventDefault();
+                        store.dispatch({ type: 'create', mode: 'create' });
+                    ">만들기</a></li>
+                <li><input type="button" value="삭제하기" onclick="
+                        event.preventDefault();
+                        store.dispatch({ type: 'delete', mode: 'read', choiceId: ${state.choiceId} });
+                    "></li>
+            </ul>
+        `;
+    }
+    crud();
+
+    function content() {
+        var state = store.getState();
+
+        var contents;
+        if(state.mode === 'main') {
+            contents = `<div>${state.subject.subtitle}</div>`;
+        } else if(state.mode === 'read') {
+            var _champion;
+            for(var i in state.content) {
+                if(state.choiceId === state.content[i].id) {
+                    _champion = state.content[i].champion;
+                }
+            }
+            contents = `<div>${_champion}</div>`;
+        } else if(state.mode === 'create') {
+            contents = `
+                <form onsubmit="
+                    event.preventDefault();
+                    _name = this.name.value;
+                    _champion = this.champion.value;
+                    store.dispatch({ type: 'submit', _name: _name, _champion: _champion });
+                ">
+                    <input type="text" name="name">
+                    <textarea name="champion"></textarea>
+                    <input type="submit" value="생성하기">
+                </form>
+            `;
+        }
+        
+        document.querySelector('#content').innerHTML = `
+            ${contents} 
+        `;
+    }
+    content();
+    store.subscribe(content);
+
+    </script>
+    
+</body>
+</html>

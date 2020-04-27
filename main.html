@@ -130,6 +130,7 @@
                     ]
                 }
             }
+            
             var newState = {};
             if(action.type === 'SELECT') {
                 newState = Object.assign(newState, state, { selected_id: action.id, mode: 'read' });
